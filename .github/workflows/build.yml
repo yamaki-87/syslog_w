@@ -1,0 +1,41 @@
+name: Build (x64 & ARM64)
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: build-${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-24.04           # x86_64
+            runs_on: ubuntu-24.04
+            arch_tag: x86_64
+          - os: ubuntu-24.04-arm       # aarch64
+            runs_on: ubuntu-24.04-arm
+            arch_tag: aarch64
+    runs-on: ${{ matrix.runs_on }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install system deps
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y pkg-config libsystemd-dev build-essential
+
+      - name: Set up Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy
+
+      - name: Build (release)
+        run: cargo build --release --locked
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: syslog_w-${{ matrix.arch_tag }}
+          path: target/release/syslog_w
