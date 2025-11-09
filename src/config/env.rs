@@ -5,6 +5,7 @@ pub struct EnvCache {
     webhock: String,
     ndis_url: String,
     max_retry: u32,
+    log_level: String,
 }
 
 impl EnvCache {
@@ -17,6 +18,7 @@ impl EnvCache {
                 .expect("環境変数MAX_RETRYが存在しません")
                 .parse::<u32>()
                 .expect("数値に変換できません"),
+            log_level: std::env::var("LOG_LEVEL").unwrap_or("info".to_string()),
         }
     }
 
@@ -28,6 +30,10 @@ impl EnvCache {
     }
     pub fn get_ndis_url(&self) -> &str {
         &self.ndis_url
+    }
+
+    pub fn get_log_level(&self) -> &str {
+        &self.log_level
     }
 
     pub fn get_max_retry(&self) -> u32 {

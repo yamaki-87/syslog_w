@@ -16,9 +16,9 @@ pub mod service;
 #[tokio::main]
 async fn main() -> Result<()> {
     let _ = dotenvy::dotenv();
+    let env = config::env::get_env_cache();
     logger_init();
 
-    let env = config::env::get_env_cache();
     let target = target::load_config(env.get_target_yml())?;
     info!("config yml:{:?}", &target);
 
@@ -32,12 +32,8 @@ async fn main() -> Result<()> {
 }
 
 fn logger_init() {
-    let level = if cfg!(debug_assertions) {
-        "debug"
-    } else {
-        "info"
-    };
-    Logger::try_with_str(level)
+    let env = config::env::get_env_cache();
+    Logger::try_with_str(env.get_log_level())
         .unwrap()
         .format(custom_fmt)
         .duplicate_to_stdout(flexi_logger::Duplicate::All)
