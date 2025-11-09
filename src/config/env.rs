@@ -6,6 +6,7 @@ pub struct EnvCache {
     ndis_url: String,
     max_retry: u32,
     log_level: String,
+    read_interval: u64,
 }
 
 impl EnvCache {
@@ -19,6 +20,10 @@ impl EnvCache {
                 .parse::<u32>()
                 .expect("数値に変換できません"),
             log_level: std::env::var("LOG_LEVEL").unwrap_or("info".to_string()),
+            read_interval: std::env::var("JOURNAL_INTERVAL")
+                .expect("環境変数JOURNAL_INTERVALが存在しません")
+                .parse::<u64>()
+                .expect("数値に変換できません"),
         }
     }
 
@@ -38,6 +43,10 @@ impl EnvCache {
 
     pub fn get_max_retry(&self) -> u32 {
         self.max_retry
+    }
+
+    pub fn get_journal_read_interval(&self) -> u64 {
+        self.read_interval
     }
 }
 

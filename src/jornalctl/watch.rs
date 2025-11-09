@@ -5,7 +5,7 @@ use log::{error, info};
 use systemd::{Journal, journal};
 
 use crate::{
-    config::target::JournalConfig,
+    config::{env, target::JournalConfig},
     jornalctl::WatchInput,
     service::journal_analyzer::{JournalAnalyzer, JournalAnalyzerInput},
 };
@@ -22,13 +22,13 @@ impl JournalWatcher {
         info!("journal監視ログ START");
         let mut jouranl = journal::OpenOptions::default().open()?;
         self.target_set_journal(&input.config, &mut jouranl)?;
+        let read_interval = env::get_env_cache().get_journal_read_interval();
 
         loop {
-            log::debug!("loop ----");
             let entry_result: std::result::Result<
                 Option<std::collections::BTreeMap<String, String>>,
                 std::io::Error,
-            > = jouranl.await_next_entry(Some(Duration::from_secs(5)));
+            > = jouranl.await_next_entry(Some(Duration::from_secs(read_interval)));
             let entry_some = match entry_result {
                 Ok(entry) => entry,
                 Err(e) => {
@@ -43,7 +43,7 @@ impl JournalWatcher {
             }
 
             let entry = entry_some.unwrap();
-            log::debug!("{:?}", &entry);
+            log::info!("解析対象ログ：{:?}", &entry);
             if let Err(e) = self
                 .service
                 .execute(JournalAnalyzerInput::new(entry, &input.config))

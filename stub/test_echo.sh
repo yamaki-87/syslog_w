@@ -17,5 +17,5 @@ while true; do
     # ランダムに1つ選択
     msg=${messages[$RANDOM % ${#messages[@]}]}
     echo "[Test Service] $(date +%Y-%m-%dT%H:%M:%S) - $msg"
-    sleep 1
+    sleep 3
 done
