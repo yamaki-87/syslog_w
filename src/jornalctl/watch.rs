@@ -1,3 +1,5 @@
+use std::time::Duration;
+
 use anyhow::Result;
 use log::{error, info};
 use systemd::{Journal, journal};
@@ -22,12 +24,11 @@ impl JournalWatcher {
         self.target_set_journal(&input.config, &mut jouranl)?;
 
         loop {
-            tokio::time::sleep(tokio::time::Duration::from_secs(1)).await;
             log::debug!("loop ----");
             let entry_result: std::result::Result<
                 Option<std::collections::BTreeMap<String, String>>,
                 std::io::Error,
-            > = jouranl.await_next_entry(None);
+            > = jouranl.await_next_entry(Some(Duration::from_secs(5)));
             let entry_some = match entry_result {
                 Ok(entry) => entry,
                 Err(e) => {
